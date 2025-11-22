@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VBA Prompt Generator - All in One</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 600; }
+        .tab-inactive { color: #6b7280; }
+        .tab-inactive:hover { color: #374151; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-700 to-blue-500 p-6 text-white flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold"><i class="fas fa-file-code mr-2"></i> VBA Prompt Generator</h1>
+                <p class="text-blue-100 mt-1 text-sm">เครื่องมือสร้างคำสั่งให้ AI เขียน VBA Excel ครบวงจร</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200 bg-gray-50">
+            <button onclick="switchTab('save')" id="tab-save" class="flex-1 py-4 px-6 text-center focus:outline-none tab-active">
+                <i class="fas fa-save mr-2"></i> 1. บันทึก (Save)
+            </button>
+            <button onclick="switchTab('search')" id="tab-search" class="flex-1 py-4 px-6 text-center focus:outline-none tab-inactive">
+                <i class="fas fa-search mr-2"></i> 2. ค้นหา (Search)
+            </button>
+            <button onclick="switchTab('delete')" id="tab-delete" class="flex-1 py-4 px-6 text-center focus:outline-none tab-inactive">
+                <i class="fas fa-trash-alt mr-2"></i> 3. ลบ (Delete)
+            </button>
+            <button onclick="switchTab('clear')" id="tab-clear" class="flex-1 py-4 px-6 text-center focus:outline-none tab-inactive">
+                <i class="fas fa-eraser mr-2"></i> 4. ล้าง (Clear)
+            </button>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Left Column: Input Form -->
+            <div class="space-y-4">
+                
+                <!-- ================= TAB 1: SAVE ================= -->
+                <div id="content-save" class="space-y-4">
+                    <h2 class="text-blue-600 font-semibold border-l-4 border-blue-600 pl-2">ตั้งค่าการบันทึกข้อมูล</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-500">Sheet ต้นทาง (Input)</label>
+                            <input type="text" id="saveSourceSheet" value="Sheet1" class="w-full border rounded p-2 text-sm bg-gray-50">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">Sheet ปลายทาง (DB)</label>
+                            <input type="text" id="saveDestSheet" value="Sheet2" class="w-full border rounded p-2 text-sm bg-green-50">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">เซลล์ข้อมูลที่จะส่งไป (คั่นด้วย ,)</label>
+                        <textarea id="saveSourceCells" rows="3" class="w-full border rounded p-2 text-xs font-mono">C2,C3,C5,C6,C7,C8,C9,C10,C12,C13,C14,C16,C18,C19,C20,C22,C24,C26,C28,C29,C30</textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">บันทึกไปที่คอลัมน์ (เช่น A:U)</label>
+                        <input type="text" id="saveDestCols" value="A:U" class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
+                        <label class="text-xs font-bold text-yellow-700 block mb-1">การตรวจสอบ ID ซ้ำ (Update)</label>
+                        <div class="flex gap-2 items-center">
+                            <span class="text-xs">เช็ค</span> <input type="text" id="saveIdCell" value="C2" class="w-12 text-center border rounded p-1 text-xs">
+                            <span class="text-xs">กับ Col</span> <input type="text" id="saveDestIdCol" value="A" class="w-12 text-center border rounded p-1 text-xs">
+                            <span class="text-xs text-gray-500">(ถ้าซ้ำจะถามก่อนทับ)</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">เซลล์ที่ต้องการเคลียร์ค่าหลังบันทึก</label>
+                        <textarea id="saveClearCells" rows="2" class="w-full border rounded p-2 text-xs font-mono">C3,C4,C6,C7,C8,C9,C10,C11,C14,C15,C17,C19,C20,C21,C23,C25,C27,C30</textarea>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 2: SEARCH ================= -->
+                <div id="content-search" class="space-y-4 hidden">
+                    <h2 class="text-blue-600 font-semibold border-l-4 border-blue-600 pl-2">ตั้งค่าการค้นหาดึงข้อมูล</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-500">Sheet หน้าฟอร์ม (Input)</label>
+                            <input type="text" id="searchSourceSheet" value="Sheet1" class="w-full border rounded p-2 text-sm bg-gray-50">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">Sheet ฐานข้อมูล (DB)</label>
+                            <input type="text" id="searchDestSheet" value="Sheet2" class="w-full border rounded p-2 text-sm bg-green-50">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded border border-blue-200">
+                         <label class="text-xs font-bold text-blue-700 block mb-1">เงื่อนไขการค้นหา (Matching)</label>
+                         <div class="flex gap-2 items-center text-sm">
+                            เอาค่า <input type="text" id="searchIdCell" value="C2" class="w-12 text-center border rounded p-1">
+                            ไปหาใน Col <input type="text" id="searchDbCol" value="A" class="w-12 text-center border rounded p-1">
+                            ของ Database
+                         </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">คอลัมน์จาก DB ที่จะดึงมา (เช่น B,D,E)</label>
+                        <input type="text" id="searchFromCols" value="B,D,E,F,G,H,K,N,O,U" class="w-full border rounded p-2 text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">เอามาวางใส่เซลล์ (จำนวนต้องเท่ากัน)</label>
+                        <textarea id="searchToCells" rows="3" class="w-full border rounded p-2 text-xs font-mono">C3,C6,C7,C8,C9,C10,C14,C19,C20,C30</textarea>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 3: DELETE ================= -->
+                <div id="content-delete" class="space-y-4 hidden">
+                    <h2 class="text-red-600 font-semibold border-l-4 border-red-600 pl-2">ตั้งค่าการลบข้อมูล</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-500">Sheet หน้าฟอร์ม (Input)</label>
+                            <input type="text" id="delSourceSheet" value="Sheet1" class="w-full border rounded p-2 text-sm bg-gray-50">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">Sheet ที่จะลบ (Target)</label>
+                            <input type="text" id="delTargetSheet" value="Sheet3" class="w-full border rounded p-2 text-sm bg-red-50">
+                        </div>
+                    </div>
+                     <div class="bg-red-50 p-3 rounded border border-red-200">
+                         <label class="text-xs font-bold text-red-700 block mb-1">เงื่อนไขการลบ</label>
+                         <div class="flex gap-2 items-center text-sm">
+                            ลบแถวใน <span id="lblDelSheet" class="font-bold">Sheet3</span> ที่ Col <input type="text" id="delCol" value="A" class="w-10 text-center border rounded p-1">
+                            ตรงกับ <input type="text" id="delIdCell" value="C2" class="w-12 text-center border rounded p-1">
+                         </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <input type="checkbox" id="delSort" checked class="mt-1">
+                        <label for="delSort" class="text-sm">เมื่อลบเสร็จ ให้เรียงลำดับข้อมูลใหม่ (Sort A-Z)</label>
+                    </div>
+                     <div class="flex items-start gap-2">
+                        <input type="checkbox" id="delGenId" checked class="mt-1">
+                        <label for="delGenId" class="text-sm">Update ID ล่าสุดกลับมาที่ C2 (Max + 1)</label>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 4: CLEAR ================= -->
+                <div id="content-clear" class="space-y-4 hidden">
+                     <h2 class="text-gray-600 font-semibold border-l-4 border-gray-600 pl-2">ตั้งค่าปุ่มล้างข้อมูล</h2>
+                     <div>
+                        <label class="text-xs text-gray-500">Sheet ที่ต้องการล้าง</label>
+                        <input type="text" id="clearSheet" value="Sheet1" class="w-full border rounded p-2 text-sm bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">เซลล์ที่ต้องการ Clear Contents (คั่นด้วย ,)</label>
+                        <textarea id="clearTargetCells" rows="3" class="w-full border rounded p-2 text-sm font-mono">C2,C3</textarea>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button onclick="generatePrompt()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200 shadow-md mt-4">
+                    <i class="fas fa-magic mr-2"></i> สร้าง Prompt (ภาษาไทย)
+                </button>
+            </div>
+
+            <!-- Right Column: Result -->
+            <div class="bg-gray-800 rounded-lg p-4 flex flex-col h-full relative">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-white font-semibold text-sm"><i class="fas fa-robot text-yellow-400 mr-2"></i>ผลลัพธ์ (Copy ไปวางใน AI)</h3>
+                    <button onclick="copyToClipboard()" class="bg-gray-600 hover:bg-gray-500 text-white text-xs py-1 px-3 rounded border border-gray-500 transition">
+                        <i class="fas fa-copy mr-1"></i> คัดลอก
+                    </button>
+                </div>
+                <textarea id="outputPrompt" class="w-full flex-grow bg-gray-900 text-green-400 font-mono text-xs p-3 rounded border border-gray-700 focus:outline-none resize-none leading-relaxed" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed bottom-5 right-5 bg-green-600 text-white px-6 py-3 rounded shadow-lg transform transition-all duration-300 translate-y-20 opacity-0">
+        คัดลอก Prompt เรียบร้อย!
+    </div>
+
+    <script>
+        let activeTab = 'save';
+
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            // Update Tab Styles
+            ['save', 'search', 'delete', 'clear'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`content-${t}`);
+                if (t === tabName) {
+                    btn.classList.add('tab-active');
+                    btn.classList.remove('tab-inactive');
+                    content.classList.remove('hidden');
+                } else {
+                    btn.classList.add('tab-inactive');
+                    btn.classList.remove('tab-active');
+                    content.classList.add('hidden');
+                }
+            });
+
+            // Update Delete Label helper
+            if(tabName === 'delete') {
+                document.getElementById('lblDelSheet').innerText = document.getElementById('delTargetSheet').value;
+            }
+            
+            generatePrompt();
+        }
+
+        // Add Listener to update dynamic labels
+        document.getElementById('delTargetSheet').addEventListener('input', function() {
+            document.getElementById('lblDelSheet').innerText = this.value;
+        });
+
+        function generatePrompt() {
+            let promptText = "";
+            const role = "สวมบทบาทเป็นผู้เชี่ยวชาญ Excel VBA ช่วยเขียนโค้ด Subroutine ที่สะอาดและทำงานรวดเร็วให้หน่อยครับ";
+
+            if (activeTab === 'save') {
+                const src = document.getElementById('saveSourceSheet').value;
+                const dest = document.getElementById('saveDestSheet').value;
+                const cells = document.getElementById('saveSourceCells').value;
+                const cols = document.getElementById('saveDestCols').value;
+                const idCell = document.getElementById('saveIdCell').value;
+                const destIdCol = document.getElementById('saveDestIdCol').value;
+                const clearCells = document.getElementById('saveClearCells').value;
+
+                promptText = `${role} สำหรับ "ปุ่มบันทึก" โดยมีตรรกะการทำงานดังนี้:
+1. **แหล่งข้อมูล (Source)**: รับค่าจาก Sheet [${src}] เซลล์: ${cells}
+2. **ปลายทาง (Destination)**: นำไปบันทึกที่ Sheet [${dest}] คอลัมน์ ${cols}
+3. **การตรวจสอบ (Validation)**: เช็คว่าค่า ID ใน [${src}] เซลล์ ${idCell} มีอยู่แล้วใน [${dest}] คอลัมน์ ${destIdCol} หรือไม่
+   - ถ้ามี (Exists): ให้แสดง MsgBox ถามว่า "ID นี้มีอยู่แล้ว ต้องการอัปเดตข้อมูลทับหรือไม่?" 
+     - ถ้าตอบ Yes: ให้บันทึกทับแถวเดิม
+     - ถ้าตอบ No: ให้จบการทำงาน (Exit Sub)
+   - ถ้าไม่มี (New): ให้หาแถวว่างถัดไป (Next Empty Row) เพื่อบันทึกข้อมูลใหม่
+4. **หลังบันทึก (Post-Save)**:
+   - ล้างข้อมูล (ClearContents) ใน [${src}] ที่เซลล์: ${clearCells}
+   - รันเลข ID ใหม่: ให้ [${src}] เซลล์ ${idCell} = ค่า Max ใน [${dest}] คอลัมน์ ${destIdCol} + 1`;
+
+            } else if (activeTab === 'search') {
+                const src = document.getElementById('searchSourceSheet').value;
+                const dest = document.getElementById('searchDestSheet').value;
+                const idCell = document.getElementById('searchIdCell').value;
+                const dbCol = document.getElementById('searchDbCol').value;
+                const fromCols = document.getElementById('searchFromCols').value;
+                const toCells = document.getElementById('searchToCells').value;
+
+                promptText = `${role} สำหรับ "ปุ่มค้นหา" โดยมีเงื่อนไขดังนี้:
+1. **จุดเริ่ม (Trigger)**: ดูค่าที่ต้องการค้นหาจาก [${src}] เซลล์ ${idCell}
+2. **ค้นหา (Search)**: นำค่านั้นไปหาใน [${dest}] คอลัมน์ ${dbCol}
+3. **การกระทำ (Action)**: ถ้าเจอข้อมูล ให้คัดลอกค่าจาก [${dest}] คอลัมน์ [${fromCols}] -> มาใส่ที่ [${src}] เซลล์ [${toCells}] (ตามลำดับ)
+4. **Error Handling**: ถ้าไม่เจอข้อมูล ให้แสดง MsgBox แจ้งเตือนว่า "ไม่พบข้อมูล"`;
+
+            } else if (activeTab === 'delete') {
+                const src = document.getElementById('delSourceSheet').value;
+                const target = document.getElementById('delTargetSheet').value;
+                const idCell = document.getElementById('delIdCell').value;
+                const delCol = document.getElementById('delCol').value;
+                const doSort = document.getElementById('delSort').checked;
+                const doGen = document.getElementById('delGenId').checked;
+
+                promptText = `${role} สำหรับ "ปุ่มลบข้อมูล" โดยมีเงื่อนไขดังนี้:
+1. **ค้นหาเพื่อลบ**: หาแถวใน [${target}] ที่ค่าในคอลัมน์ ${delCol} ตรงกับค่าใน [${src}] เซลล์ ${idCell}
+2. **การกระทำ**: ถ้าเจอ ให้ลบทั้งแถวนั้นทิ้ง (Delete Row)
+3. **หลังลบเสร็จ**:
+   ${doSort ? `- ให้เรียงลำดับข้อมูลใน [${target}] ใหม่ โดยยึดคอลัมน์ ${delCol} (Ascending)` : ''}
+   ${doGen ? `- ให้หาค่า Max ใน [${target}] คอลัมน์ ${delCol} แล้ว +1 เพื่อนำค่ากลับมาใส่ที่ [${src}] เซลล์ ${idCell} (เป็นการเตรียม ID ใหม่)` : ''}
+4. **ความปลอดภัย**: ก่อนลบ ต้องมี MsgBox ถามยืนยันว่า "ต้องการลบข้อมูลนี้ใช่หรือไม่?" เสมอ`;
+
+            } else if (activeTab === 'clear') {
+                const sheet = document.getElementById('clearSheet').value;
+                const cells = document.getElementById('clearTargetCells').value;
+
+                promptText = `${role} สำหรับ "ปุ่มล้างข้อมูล" (Reset):
+หน้าที่:
+- สั่ง ClearContents ข้อมูลใน Sheet [${sheet}] เฉพาะเซลล์ [${cells}]
+- เงื่อนไข: ห้ามลบ format หรือสูตร ให้ลบแค่ค่า (Values) เท่านั้น`;
+            }
+
+            document.getElementById('outputPrompt').value = promptText;
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("outputPrompt");
+            copyText.select();
+            document.execCommand("copy");
+            
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden', 'translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        // Init
+        window.onload = generatePrompt;
+    </script>
+</body>
+</html>
