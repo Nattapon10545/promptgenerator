@@ -113,7 +113,7 @@
                     </div>
                 </div>
 
-                <!-- ================= TAB 3: DELETE ================= -->
+                <!-- ================= TAB 3: DELETE (UPDATED) ================= -->
                 <div id="content-delete" class="space-y-4 hidden">
                     <h2 class="text-red-600 font-semibold border-l-4 border-red-600 pl-2">ตั้งค่าการลบข้อมูล</h2>
                     <div class="grid grid-cols-2 gap-3">
@@ -133,9 +133,12 @@
                             ตรงกับ <input type="text" id="delIdCell" value="C2" class="w-12 text-center border rounded p-1">
                          </div>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <input type="checkbox" id="delSort" checked class="mt-1">
-                        <label for="delSort" class="text-sm">เมื่อลบเสร็จ ให้เรียงลำดับข้อมูลใหม่ (Sort A-Z)</label>
+                    <div class="flex items-start gap-2 bg-yellow-50 p-2 rounded border border-yellow-200">
+                        <input type="checkbox" id="delRenumber" checked class="mt-1 h-4 w-4 text-red-600">
+                        <div>
+                            <label for="delRenumber" class="text-sm font-bold text-gray-800">รันเลขลำดับใหม่ (Re-number 1,2,3...)</label>
+                            <p class="text-xs text-gray-500">แก้เลขในคอลัมน์ A ใหม่ทั้งหมดให้เรียงกัน (1, 2, 4 -> 1, 2, 3)</p>
+                        </div>
                     </div>
                      <div class="flex items-start gap-2">
                         <input type="checkbox" id="delGenId" checked class="mt-1">
@@ -143,7 +146,7 @@
                     </div>
                 </div>
 
-                <!-- ================= TAB 4: CLEAR (UPDATED) ================= -->
+                <!-- ================= TAB 4: CLEAR ================= -->
                 <div id="content-clear" class="space-y-4 hidden">
                      <h2 class="text-gray-600 font-semibold border-l-4 border-gray-600 pl-2">ตั้งค่าปุ่มล้างข้อมูล & รันเลขใหม่</h2>
                      
@@ -287,14 +290,14 @@
                 const target = document.getElementById('delTargetSheet').value;
                 const idCell = document.getElementById('delIdCell').value;
                 const delCol = document.getElementById('delCol').value;
-                const doSort = document.getElementById('delSort').checked;
+                const doRenumber = document.getElementById('delRenumber').checked;
                 const doGen = document.getElementById('delGenId').checked;
 
                 promptText = `${role} สำหรับ "ปุ่มลบข้อมูล" โดยมีเงื่อนไขดังนี้:
 1. **ค้นหาเพื่อลบ**: หาแถวใน [${target}] ที่ค่าในคอลัมน์ ${delCol} ตรงกับค่าใน [${src}] เซลล์ ${idCell}
 2. **การกระทำ**: ถ้าเจอ ให้ลบทั้งแถวนั้นทิ้ง (Delete Row)
 3. **หลังลบเสร็จ**:
-   ${doSort ? `- ให้เรียงลำดับข้อมูลใน [${target}] ใหม่ โดยยึดคอลัมน์ ${delCol} (Ascending)` : ''}
+   ${doRenumber ? `- ให้ทำการรันเลขลำดับใหม่ (Re-numbering) ในคอลัมน์ ${delCol} ตั้งแต่แถวแรกถึงแถวสุดท้าย ให้เป็นเลขเรียง 1, 2, 3... เพื่อไม่ให้เลขข้าม (เช่น ถ้าลบ 3 ไป เหลือ 1,2,4,5 ให้แก้ค่าในเซลล์เป็น 1,2,3,4)` : ''}
    ${doGen ? `- ให้หาค่า Max ใน [${target}] คอลัมน์ ${delCol} แล้ว +1 เพื่อนำค่ากลับมาใส่ที่ [${src}] เซลล์ ${idCell} (เป็นการเตรียม ID ใหม่)` : ''}
 4. **ความปลอดภัย**: ก่อนลบ ต้องมี MsgBox ถามยืนยันว่า "ต้องการลบข้อมูลนี้ใช่หรือไม่?" เสมอ`;
 
