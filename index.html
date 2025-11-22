@@ -143,16 +143,45 @@
                     </div>
                 </div>
 
-                <!-- ================= TAB 4: CLEAR ================= -->
+                <!-- ================= TAB 4: CLEAR (UPDATED) ================= -->
                 <div id="content-clear" class="space-y-4 hidden">
-                     <h2 class="text-gray-600 font-semibold border-l-4 border-gray-600 pl-2">ตั้งค่าปุ่มล้างข้อมูล</h2>
-                     <div>
-                        <label class="text-xs text-gray-500">Sheet ที่ต้องการล้าง</label>
-                        <input type="text" id="clearSheet" value="Sheet1" class="w-full border rounded p-2 text-sm bg-gray-50">
+                     <h2 class="text-gray-600 font-semibold border-l-4 border-gray-600 pl-2">ตั้งค่าปุ่มล้างข้อมูล & รันเลขใหม่</h2>
+                     
+                     <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-500">Sheet หน้าฟอร์ม (Input)</label>
+                            <input type="text" id="clearSheet" value="Sheet1" class="w-full border rounded p-2 text-sm bg-gray-50">
+                        </div>
+                        <div>
+                             <label class="text-xs text-gray-500">โฟกัสเซลล์ (เมื่อเสร็จ)</label>
+                             <input type="text" id="clearFocusCell" value="C3" class="w-full border rounded p-2 text-sm text-center bg-white font-bold text-blue-600">
+                        </div>
                     </div>
+
                     <div>
                         <label class="text-xs text-gray-500">เซลล์ที่ต้องการ Clear Contents (คั่นด้วย ,)</label>
-                        <textarea id="clearTargetCells" rows="3" class="w-full border rounded p-2 text-sm font-mono">C2,C3</textarea>
+                        <textarea id="clearTargetCells" rows="2" class="w-full border rounded p-2 text-sm font-mono">C3, C4, C6, C7, C8, C9, C10, C11, C13</textarea>
+                    </div>
+
+                    <div class="bg-gray-100 p-3 rounded border border-gray-300">
+                        <div class="flex items-center mb-2">
+                            <input type="checkbox" id="clearGenId" checked class="mr-2 h-4 w-4 text-blue-600">
+                            <label for="clearGenId" class="text-sm font-bold text-gray-700">รันเลข ID ใหม่ (Auto-Run ID)</label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pl-6">
+                             <div>
+                                <label class="text-xs text-gray-500">ดึง Max ID จาก Sheet</label>
+                                <input type="text" id="clearDbSheet" value="Sheet3" class="w-full border rounded p-1 text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">คอลัมน์ ID (ใน DB)</label>
+                                <input type="text" id="clearDbCol" value="A" class="w-full border rounded p-1 text-sm bg-white text-center">
+                            </div>
+                             <div class="col-span-2">
+                                <label class="text-xs text-gray-500">เซลล์ ID หน้าฟอร์ม (ที่จะใส่ค่าใหม่)</label>
+                                <input type="text" id="clearIdCell" value="C2" class="w-full border rounded p-1 text-sm bg-white text-center font-bold text-red-600">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -272,11 +301,21 @@
             } else if (activeTab === 'clear') {
                 const sheet = document.getElementById('clearSheet').value;
                 const cells = document.getElementById('clearTargetCells').value;
+                const focusCell = document.getElementById('clearFocusCell').value;
+                
+                const doGenId = document.getElementById('clearGenId').checked;
+                const dbSheet = document.getElementById('clearDbSheet').value;
+                const dbCol = document.getElementById('clearDbCol').value;
+                const idCell = document.getElementById('clearIdCell').value;
 
-                promptText = `${role} สำหรับ "ปุ่มล้างข้อมูล" (Reset):
-หน้าที่:
-- สั่ง ClearContents ข้อมูลใน Sheet [${sheet}] เฉพาะเซลล์ [${cells}]
-- เงื่อนไข: ห้ามลบ format หรือสูตร ให้ลบแค่ค่า (Values) เท่านั้น`;
+                promptText = `${role} สำหรับ "ปุ่มล้างข้อมูลและเตรียมฟอร์มใหม่" (Reset Form) โดยมีขั้นตอนดังนี้:
+1. **ล้างข้อมูล**: สั่ง ClearContents ใน Sheet [${sheet}] เฉพาะเซลล์ที่ไม่ต่อเนื่องกันกลุ่มนี้: [${cells}]
+${doGenId ? `2. **รันเลข ID ใหม่ (Auto-Run)**: 
+   - ให้หาค่า Max ใน Sheet [${dbSheet}] คอลัมน์ ${dbCol}
+   - กรณีไม่พบข้อมูล (หรือเป็น 0) ให้เริ่มที่ 1
+   - กรณีพบข้อมูล ให้นำค่า Max + 1
+   - นำผลลัพธ์ที่ได้ไปใส่ใน Sheet [${sheet}] เซลล์ ${idCell} (ใช้ On Error Resume Next เพื่อกัน Error กรณี DB ว่าง)` : ''}
+3. **โฟกัส**: สุดท้ายให้ Select ไปที่เซลล์ ${focusCell} เพื่อให้ User พร้อมกรอกข้อมูลทันที`;
             }
 
             document.getElementById('outputPrompt').value = promptText;
